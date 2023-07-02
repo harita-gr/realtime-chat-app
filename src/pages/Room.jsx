@@ -63,7 +63,7 @@ const Room = () => {
     );
 
     // console.log("Created!", response);
-    //Note: Shifted to event subscription
+    // Note: Shifted to event subscription
     // setMessages((prevState) => [response, ...prevState]);
 
     setMessageBody("");
