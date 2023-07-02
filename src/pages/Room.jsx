@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
+import client, {
   databases,
   DATABASE_ID,
   COLLECTION_ID_MESSAGES,
@@ -13,6 +13,39 @@ const Room = () => {
 
   useEffect(() => {
     getMessages();
+
+    //Subscription on initial page load
+    const unsubscribe = client.subscribe(
+      `databases.${DATABASE_ID}.collections.${COLLECTION_ID_MESSAGES}.documents`,
+      (response) => {
+        //Callback will be executed on changes for documents A and all files
+
+        if (
+          response.events.includes(
+            "databases.*.collections.*.documents.*.create"
+          )
+        ) {
+          console.log("A MESSAGE WAS CREATED");
+          setMessages((prevState) => [response.payload, ...prevState]);
+        }
+
+        if (
+          response.events.includes(
+            "databases.*.collections.*.documents.*.delete"
+          )
+        ) {
+          console.log("A MESSAGE WAS DELETED");
+          setMessages((prevState) =>
+            messages.filter((message) => message.$id !== response.payload.$id)
+          );
+        }
+      }
+    );
+
+    //Unsubscribe
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleSubmit = async (e) => {
@@ -30,7 +63,8 @@ const Room = () => {
     );
 
     // console.log("Created!", response);
-    setMessages((prevState) => [response, ...prevState]);
+    //Note: Shifted to event subscription
+    // setMessages((prevState) => [response, ...prevState]);
 
     setMessageBody("");
   };
@@ -46,9 +80,10 @@ const Room = () => {
 
   const deleteMessage = async (message_id) => {
     databases.deleteDocument(DATABASE_ID, COLLECTION_ID_MESSAGES, message_id);
-    setMessages((prevState) =>
-      messages.filter((message) => message.$id !== message_id)
-    );
+    //Note: Shifted to subscription event
+    // setMessages((prevState) =>
+    //   messages.filter((message) => message.$id !== message_id)
+    // );
   };
 
   return (
