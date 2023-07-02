@@ -1,5 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { ID } from "appwrite";
+
 import { account } from "../appwriteConfig";
 
 const AuthContext = createContext();
@@ -19,7 +21,7 @@ export const AuthProvider = ({ children }) => {
       const accountDetails = await account.get();
       setUser(accountDetails);
     } catch (error) {
-      console.error("Error:", error);
+      console.warn("Error:", error);
     }
     setLoading(false);
   };
@@ -40,6 +42,36 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const handleUserRegister = async (e, credentials) => {
+    e.preventDefault();
+
+    if (credentials.password1 !== credentials.password2) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await account.create(
+        ID.unique(),
+        credentials.email,
+        credentials.password1,
+        credentials.name
+      );
+
+      //login
+      await account.createEmailSession(
+        credentials.email,
+        credentials.password1
+      );
+
+      const accountDetails = await account.get();
+      setUser(accountDetails);
+      navigate("/");
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   const handleUserLogOut = async () => {
     await account.deleteSession("current");
     setUser(null);
@@ -49,6 +81,7 @@ export const AuthProvider = ({ children }) => {
     user,
     handleUserLogin,
     handleUserLogOut,
+    handleUserRegister,
   };
 
   return (

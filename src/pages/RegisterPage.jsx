@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../utils/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
-const LoginPage = () => {
-  const { user, handleUserLogin } = useAuth();
+import { useAuth } from "../utils/AuthContext";
+
+const RegisterPage = () => {
+  const { user, handleUserRegister } = useAuth();
   const navigate = useNavigate();
 
   const [credentials, setCredentials] = useState({
+    name: "",
     email: "",
-    password: "",
+    password1: "",
+    password2: "",
   });
 
   useEffect(() => {
@@ -27,7 +30,19 @@ const LoginPage = () => {
   return (
     <div className="auth--container">
       <div className="form--wrapper">
-        <form onSubmit={(e) => handleUserLogin(e, credentials)}>
+        <form onSubmit={(e) => handleUserRegister(e, credentials)}>
+          <div className="field--wrapper">
+            <label>Name:</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter your name"
+              required
+              value={credentials.name}
+              onChange={handleInputChange}
+            />
+          </div>
+
           <div className="field--wrapper">
             <label>Email:</label>
             <input
@@ -44,28 +59,40 @@ const LoginPage = () => {
             <label>Password:</label>
             <input
               type="password"
-              name="password"
+              name="password1"
               placeholder="Enter your password"
               required
-              value={credentials.password}
+              value={credentials.password1}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="field--wrapper">
+            <label>Confirm Password:</label>
+            <input
+              type="password"
+              name="password2"
+              placeholder="Confirm your password"
+              required
+              value={credentials.password2}
               onChange={handleInputChange}
             />
           </div>
 
           <div className="field--wrapper">
             <input
-              className="btn btn--lg btn--main"
+              className="btn btn-lg btn--main"
               type="submit"
-              value="Login"
+              value="Register"
             />
           </div>
         </form>
         <p>
-          Don't have an account yet? Register <Link to="/register">here</Link>
+          Already have an account? Login <Link to="/login">here</Link>
         </p>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
